@@ -15,7 +15,8 @@ df_err = {}
 path = 'VR_Acuity_Data/datasets/'
 
 key = '/preprocessed/Rigid Body/Rat/'
-keyPass = 'Position'
+#keyPass = 'Position'
+keyPass = 'Orientation'
 keys = {'X', 'Y', 'Z'}
 
 fname = [
@@ -73,5 +74,6 @@ for i, x in enumerate(fname):
 
 # save data to file
 DF.to_hdf(path+'data_all.h5', keyPass, table=True)
+
 for i, x in enumerate(fname):
     df_tbl[i].to_hdf(path+fnameClean[i], keyPass, table=True)
