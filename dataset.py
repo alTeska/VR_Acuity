@@ -10,7 +10,6 @@ def check_nan(DataFrame, key):
             # DataFrame.drop(DataFrame.index[i], inplace=True)
             # i -= 1
 
-rat_position = {}
 df_tbl = {}
 
 path = 'VR_Acuity_Data/datasets/'
@@ -24,7 +23,7 @@ fname = [
     'VRAcuityExp_2017-07-13_16-27-08_VR-3A_NIC.h5',
     'VRAcuityExp_2017-07-13_17-09-07_VR-5A_NIC.h5', ]
 
-fname_clean = [
+fnameClean = [
     'VRAcuityExp_2017-07-13_14-39-17_VR-4A_NIC_clean.h5',
     'VRAcuityExp_2017-07-13_15-05-16_VR-2B_NIC_clean.h5',
     'VRAcuityExp_2017-07-13_15-19-09_VR-2A_EDU_clean.h5',
@@ -35,14 +34,13 @@ fname_clean = [
     'VRAcuityExp_2017-07-13_17-09-07_VR-5A_NIC_clean.h5', ]
 
 # read data from files and clean from NaN values
-key = '/preprocessed/Rigid Body/Rat/Position'
+key = '/preprocessed/Rigid Body/Rat/'
+keyPass = 'Orientation'
 for i, x in enumerate(fname):
-    df_tbl[i] = pd.read_hdf(path+fname[i], key).dropna()
-    #df_tbl[i] = rat_position[i].dropna()
+    df_tbl[i] = pd.read_hdf(path+fname[i], key+keyPass).dropna()
     check_nan(df_tbl[i], 'X')
     check_nan(df_tbl[i], 'Y')
     check_nan(df_tbl[i], 'Z')
-
 
 # concat data from different experiments
 DF = pd.DataFrame()
@@ -50,6 +48,6 @@ for i, x in enumerate(fname):
     DF = pd.concat([DF, df_tbl[i]], ignore_index=True)
 
 # save data to file
-DF.to_hdf('VR_Acuity_Data/datasets/data_all.h5', 'Position', table=True)
+DF.to_hdf('VR_Acuity_Data/datasets/data_all.h5', keyPass, table=True)
 for i, x in enumerate(fname):
-    df_tbl[i].to_hdf('VR_Acuity_Data/datasets/'+fname_clean[i], 'Position', table=True)
+    df_tbl[i].to_hdf('VR_Acuity_Data/datasets/'+fnameClean[i], keyPass, table=True)
