@@ -1,5 +1,5 @@
 # Single-datdataset creation
-# import numpy as np
+import numpy as np
 import pandas as pd
 import math
 
@@ -35,12 +35,36 @@ fnameClean = [
 
 # read data from files and clean from NaN values
 key = '/preprocessed/Rigid Body/Rat/'
-keyPass = 'Orientation'
+keyPass = 'Position'
+keys = {'X', 'Y', 'Z'}
+
+
+errKey = 'Error Per Marker'
+errValues = pd.read_hdf(path+fname[2], key+errKey)
+#print(errValues.max())
+#print(errValues.min())
+
 for i, x in enumerate(fname):
-    df_tbl[i] = pd.read_hdf(path+fname[i], key+keyPass).dropna()
+    df_tbl[i] = pd.read_hdf(path+fname[i], key+keyPass).replace([np.inf, -np.inf], np.nan).dropna()
     check_nan(df_tbl[i], 'X')
     check_nan(df_tbl[i], 'Y')
     check_nan(df_tbl[i], 'Z')
+
+
+# testing for small/big values presence
+'''
+for i, x in enumerate(df_tbl[2].Z):
+    if np.absolute(x) < 1e-5:
+        print(i, x)
+    if np.absolute(x) > 1e5:
+        print(i, x)
+
+result = df_tbl[2]
+print(len(result.X))
+result = result[result['X'] < 1e-5]
+print(len(result))
+print(result)
+'''
 
 # concat data from different experiments
 DF = pd.DataFrame()
