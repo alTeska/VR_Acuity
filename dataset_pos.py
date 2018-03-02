@@ -1,22 +1,12 @@
 # Single-datdataset creation
 import numpy as np
 import pandas as pd
-import math
-
-def check_nan(DataFrame, key):
-    for i, x in enumerate(DataFrame[key]):
-        if math.isnan(x):
-            print(i, x)
-
 
 df_tbl = {}
-df_err = {}
 
 path = 'VR_Acuity_Data/datasets/'
-
 key = '/preprocessed/Rigid Body/Rat/'
-#keyPass = 'Position'
-keyPass = 'Orientation'
+keyPass = 'Position'
 keys = {'X', 'Y', 'Z'}
 
 fname = [
@@ -41,6 +31,8 @@ fnameClean = [
 
 # Err size check for data filtering
 '''
+df_err = {}
+
 errKey = 'Error Per Marker'
 for i, x in enumerate(fname):
     errValues = pd.read_hdf(path+fname[i], key+errKey)
@@ -51,17 +43,13 @@ for i, x in enumerate(fname):
 # read data and clean from NaN/inf/wrong values
 for i, x in enumerate(fname):
     df_tbl[i] = pd.read_hdf(path+fname[i], key+keyPass).replace([np.inf, -np.inf], np.nan).dropna()
-    check_nan(df_tbl[i], 'X')
 
     # removal of smaller then err and out of range values
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['X']) > 1e-5]
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['Y']) > 1e-5]
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['Z']) > 1e-5]
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['X']) < 1   ]
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['Y']) < 1   ]
-    df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i]['Z']) < 1   ]
+    for k in keys:
+        df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i][k]) > 1e-5]
+        df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i][k]) < 1]
 
-    # removal of rat carrying position
+    # removal of rat carrying position changes
     df_tbl[i] = df_tbl[i][df_tbl[i]['X'] < 1.5e-1]
     df_tbl[i] = df_tbl[i][df_tbl[i]['Y'] < 3e-1]
     df_tbl[i] = df_tbl[i][df_tbl[i]['Z'] < 1e-1]
