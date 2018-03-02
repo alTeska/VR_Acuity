@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 df_tbl = {}
-path = 'VR_Acuity_Data/datasets/'
+path = 'datasets/'
 key = '/preprocessed/Rigid Body/Rat/'
 keyPass = 'Orientation'
 keys = {'X', 'Y', 'Z'}
