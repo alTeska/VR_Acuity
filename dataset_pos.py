@@ -2,12 +2,12 @@
 import numpy as np
 import pandas as pd
 
-df_tbl = {}
+dfTbl = {}
 
 path = 'datasets/'
 key = '/preprocessed/Rigid Body/Rat/'
 keyPass = 'Position'
-keys = {'X', 'Y', 'Z'}
+index = {'X', 'Y', 'Z'}
 
 fname = [
     'VRAcuityExp_2017-07-13_14-39-17_VR-4A_NIC.h5',
@@ -42,26 +42,26 @@ for i, x in enumerate(fname):
 
 # read data and clean from NaN/inf/wrong values
 for i, x in enumerate(fname):
-    df_tbl[i] = pd.read_hdf(path+fname[i], key+keyPass).replace([np.inf, -np.inf], np.nan).dropna()
+    dfTbl[i] = pd.read_hdf(path+fname[i], key+keyPass).replace([np.inf, -np.inf], np.nan).dropna()
 
     # removal of smaller then err and out of range values
-    for k in keys:
-        df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i][k]) > 1e-5]
-        df_tbl[i] = df_tbl[i][np.absolute(df_tbl[i][k]) < 1]
+    for k in index:
+        dfTbl[i] = dfTbl[i][np.absolute(dfTbl[i][k]) > 1e-5]
+        dfTbl[i] = dfTbl[i][np.absolute(dfTbl[i][k]) < 1]
 
     # removal of rat carrying position changes
-    df_tbl[i] = df_tbl[i][df_tbl[i]['X'] < 1.5e-1]
-    df_tbl[i] = df_tbl[i][df_tbl[i]['Y'] < 3e-1]
-    df_tbl[i] = df_tbl[i][df_tbl[i]['Z'] < 1e-1]
+    dfTbl[i] = dfTbl[i][dfTbl[i]['X'] < 1.5e-1]
+    dfTbl[i] = dfTbl[i][dfTbl[i]['Y'] < 3e-1]
+    dfTbl[i] = dfTbl[i][dfTbl[i]['Z'] < 1e-1]
 
 
 # concat data from different experiments
 DF = pd.DataFrame()
 for i, x in enumerate(fname):
-    DF = pd.concat([DF, df_tbl[i]], ignore_index=True)
+    DF = pd.concat([DF, dfTbl[i]], ignore_index=True)
 
 # save data to file
 DF.to_hdf(path+'data_all.h5', keyPass, table=True)
 
 for i, x in enumerate(fname):
-    df_tbl[i].to_hdf(path+fnameClean[i], keyPass, table=True)
+    dfTbl[i].to_hdf(path+fnameClean[i], keyPass, table=True)
