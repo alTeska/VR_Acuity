@@ -42,6 +42,12 @@ for i, x in enumerate(fname):
         dfPos[i] = dfPos[i][np.absolute(dfPos[i][k]) > 1e-5]
         dfPos[i] = dfPos[i][np.absolute(dfPos[i][k]) < 1]
 
+    # removal of rat carrying position changes p
+    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['X']) < 1.5e-1]
+    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['Y']) < 3e-1]
+    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['Z']) < 1e-1]
+
+
 # Add session in, merge into two dataframes: orientation and position df
 for i, x in enumerate(fname):
     dfPos[i]['session_id'] = i

@@ -76,6 +76,11 @@ DFVis = {}
 DFSpe = {}
 # DFDur = {}
 
+# split into 3 dictionaries
+DFVis = {}
+DFSpe = {}
+DFDur = {}
+
 for i in range(0, len(fname)):
     eventVis = {}
     eventSpe = {}
@@ -97,8 +102,7 @@ for i in range(0, len(fname)):
 
     DFVis[i] = pd.DataFrame.from_dict(eventVis, orient='index')
     DFSpe[i] = pd.DataFrame.from_dict(eventSpe, orient='index')
-    # DFDur[i] = pd.DataFrame.from_dict(eventDur, orient='index')
-
+    #DFDur[i] = pd.DataFrame.from_dict(eventDur, orient='index')
 
 DFV = {}
 DFS = {}
@@ -116,24 +120,24 @@ for i in range(0, len(fname)):
     df[i].fillna(0, inplace=True)
 
 # creation of all time data series with events - filling in the time series
-ii = 0
 dfM = {}
-for ii, x in enumerate(fname):
-    df1 = df[ii].dropna()
+for i, x in enumerate(fname):
+    df1 = df[i].dropna()
     df1.drop({'Time'}, axis=1, inplace=True)
 
-    dfM[ii] = pd.merge(dfOri[ii], df1, on='Frame', how='left')
-    dfM[ii].drop({'X', 'Y', 'Z'}, axis=1, inplace=True)
+    dfM[i] = pd.merge(dfOri[i], df1, on='Frame', how='left')
+    dfM[i].drop({'X', 'Y', 'Z'}, axis=1, inplace=True)
 
-    dfM[ii].fillna(method='ffill', inplace=True)
+    dfM[i].fillna(method='ffill', inplace=True)
 
 
 dfEvents = pd.DataFrame()
 
-# adding session id and merging into one dataset
-for ii, x in enumerate(fname):
+for i, x in enumerate(fname):
+    # adding session id
     dfM[i]['session_id'] = i
-    dfEvents = pd.concat([dfEvents, dfM[i]], axis=0, ignore_index=True)
 
+    # merging into one dataset
+    dfEvents = pd.concat([dfEvents, dfM[i]], axis=0, ignore_index=True)
 
 dfEvents.to_hdf(path+'relationaDatabase.h5', 'Events')
