@@ -21,10 +21,10 @@ keys = [
 ]
 
 dfkeys = [
-    'rat id',
+    'rat_id',
     'date',
     'experimenter',
-    'original name',
+    'original_name',
 ]
 
 # SESSION:
@@ -38,9 +38,9 @@ for i, x in enumerate(fname):
     fileName[i] = h5py.File(path+x+'.h5', 'r').attrs
 
     # create needed dataframes and indices
-    d = {'session id': [i]}
+    d = {'session_id': [i]}
     dfS[i] = pd.DataFrame(data=d)
-    dfS[i] = dfS[i].reindex(columns=['session id']+dfkeys+['video name'])
+    dfS[i] = dfS[i].reindex(columns=['session_id']+dfkeys+['video_name'])
 
 # copy data to dataframes
 for i, x in enumerate(fname):
@@ -53,6 +53,6 @@ for i, x in enumerate(fname):
 
     # merge into one dataframe
     dfSessions = pd.concat([dfSessions, dfS[i]], axis=0, ignore_index=True)
-    dfSessions['video name'] = dfSessions['original name']+'-Camera 11136'
+    dfSessions['video_name'] = dfSessions['original_name']+'-Camera 11136'
 
 dfSessions = dfSessions.astype('|S')
