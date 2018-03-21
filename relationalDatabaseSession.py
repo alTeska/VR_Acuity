@@ -49,16 +49,10 @@ for i, x in enumerate(fname):
 
     speed = fileName[i]['VR_ACUITY_CYLINDER_SPEEDS']
     dfS[i]['VRspeed'] = np.nan
-    dfS[i]['VRspeed'] = dfS[i]['VRspeed'].apply(lambda x: speed)
+    dfS[i]['VRspeed'] = dfS[i]['VRspeed'].apply(lambda x: speed).astype('str')
 
     # merge into one dataframe
     dfSessions = pd.concat([dfSessions, dfS[i]], axis=0, ignore_index=True)
     dfSessions['video name'] = dfSessions['original name']+'-Camera 11136'
 
-
-dfSessions.to_hdf(path+'relationaDatabase.h5', 'Sessions')
-
-
-#f = h5py.File(path+'relationaDatabase.h5', 'w')
-#f.create_dataset('Sessions', data=dfSessions.to_records())
-#f.close()
+dfSessions = dfSessions.astype('|S')

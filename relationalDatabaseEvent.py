@@ -59,7 +59,7 @@ for i, x in enumerate(fname):
     eventArg[i]  = fileName[key]['eventArguments']
     eventName[i] = fileName[key]['eventNames']
 
-# loading original files - for full time event data
+# loading original files - for full time/frame series data
 key = '/preprocessed/Rigid Body/Rat/Orientation'
 
 for i, x in enumerate(fname):
@@ -71,7 +71,7 @@ eventA = {}
 for i, str_dict in enumerate(fname):
     eventA[i] = make_dict(eventArg[i])
 
-# split into 3 dictionaries
+# split attr data into 3 dictionaries
 DFVis = {}
 DFSpe = {}
 # DFDur = {}
@@ -83,7 +83,6 @@ for i in range(0, len(fname)):
 
     x = eventA[i]
     j, m, n = 0, 0, 0
-    #print(x, i)
     for ii in range(0, len(x)-1):
         k = list(x[ii].keys())[0]
         if   k == 'visible':
@@ -107,7 +106,7 @@ for i in range(0, len(fname)):
     DFV[i] = index_df(DFVis[i])
     DFS[i] = index_df(DFSpe[i])
 
-# merging into one table of df
+# merging into one table of dataframes
 df = {}
 for i in range(0, len(fname)):
     df[i] = pd.concat([eventlog[i], DFV[i].visible], axis=1)
@@ -116,7 +115,7 @@ for i in range(0, len(fname)):
     df[i].fillna(method='pad', inplace=True)
     df[i].fillna(0, inplace=True)
 
-# creation of all time data series with events - for all experminets - filling in the blanks
+# creation of all time data series with events - filling in the time series
 ii = 0
 dfM = {}
 for ii, x in enumerate(fname):
@@ -138,8 +137,3 @@ for ii, x in enumerate(fname):
 
 
 dfEvents.to_hdf(path+'relationaDatabase.h5', 'Events')
-
-# save to file
-# f = h5py.File(path+'relationaDatabase.h5', 'w')
-# f.create_dataset('Events', data=dfEvents.to_records())
-# f.close()

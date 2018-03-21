@@ -53,10 +53,3 @@ for i, x in enumerate(fname):
 # merge into one dataset
 dfRatBehavior = pd.merge(dfP, dfO, on=('Frame', 'Time', 'session_id'),
                         suffixes=('_Pos', '_Ori'))
-
-dfRatBehavior.to_hdf(path+'relationaDatabase.h5', 'Rat_Behavior')
-
-# save to file
-#f = h5py.File(path+'relationaDatabase.h5', 'w')
-#f.create_dataset('Rat_Behavior', data=dfRatBehavior.to_records())
-#f.close()
