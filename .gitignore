@@ -1,2 +1,6 @@
 /helpers
 /datasets
+.ipynb_checkpoints/
+.ropeproject/
+__pycache__/
+notebooks/.ipynb_checkpoints/
