@@ -1,6 +1,6 @@
 # Script for creation of new dataset - analogical to VR_Acuity_Relational_Database_ER_Diagram.pdf
-import numpy as np
 import h5py
+import numpy as np
 import pandas as pd
 
 fname = [
