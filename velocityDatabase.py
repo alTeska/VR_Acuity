@@ -70,10 +70,6 @@ print('velocity')
 dfOri2 = dfOri2[np.absolute(dfOri2['dT']) < 0.005] # filtering out big time gaps frame points
 dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 600]   # too big velocities removal
 
-for name, dd in dfOri2.groupby('session_id'):
-    dd['UM'] = dd['U'].rolling(window=20).mean()
-    dfOriU = pd.concat([dfOriU, dd], axis=0, ignore_index=True)
-
 print('filtered and smooth')
 
 
@@ -81,5 +77,5 @@ f = h5py.File('datasets/velocityDatabase.h5', 'w')
 
 f.create_dataset('Sessions', data=rDS.dfSessions.to_records())
 f.create_dataset('Events', data=rDE.dfEvents.to_records())
-f.create_dataset('Rat_Behavior', data=dfOriU.to_records())
+f.create_dataset('Rat_Behavior', data=dfOri2.to_records())
 f.close()
