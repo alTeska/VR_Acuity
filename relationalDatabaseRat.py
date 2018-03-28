@@ -17,7 +17,7 @@ fname = [
 path = 'datasets/'
 key = '/preprocessed/Rigid Body/Rat/'
 index = ['X', 'Y', 'Z']
-
+colChoice = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
 
 dfPos = {}
 dfOri = {}
@@ -25,37 +25,32 @@ dfOri = {}
 dfP = pd.DataFrame()
 dfO = pd.DataFrame()
 
-# Loading
+# Loading and merging
 for i, x in enumerate(fname):
     dfOri[i] = pd.read_hdf(path+x+'.h5', key+'Orientation')
     dfPos[i] = pd.read_hdf(path+x+'.h5', key+'Position')
 
-    # removing NaN/inf
-    dfOri[i] = dfOri[i].replace([np.inf, -np.inf], np.nan).dropna()
-    dfPos[i] = dfPos[i].replace([np.inf, -np.inf], np.nan).dropna()
-
-    # removal of smaller then err and out of range values
-    for k in index:
-        dfOri[i] = dfOri[i][np.absolute(dfOri[i][k]) > 1e-5]
-        dfOri[i] = dfOri[i][np.absolute(dfOri[i][k]) < 1]
-
-        dfPos[i] = dfPos[i][np.absolute(dfPos[i][k]) > 1e-5]
-        dfPos[i] = dfPos[i][np.absolute(dfPos[i][k]) < 1]
+    dfOri[i]['session_id'] = i
+    dfPos[i]['session_id'] = i
 
     # removal of rat carrying position changes p
-    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['X']) < 1.5e-1]
-    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['Y']) < 3e-1]
-    dfPos[i] = dfPos[i][np.absolute(dfPos[i]['Z']) < 1e-1]
-
-
-# Add session in, merge into two dataframes: orientation and position df
-for i, x in enumerate(fname):
-    dfPos[i]['session_id'] = i
-    dfOri[i]['session_id'] = i
     dfP = pd.concat([dfP, dfPos[i]], axis=0, ignore_index=True)
     dfO = pd.concat([dfO, dfOri[i]], axis=0, ignore_index=True)
 
 
 # merge into one dataset
-dfRatBehavior = pd.merge(dfP, dfO, on=('Frame', 'Time', 'session_id'),
+dfRat = pd.merge(dfP, dfO, on=('Frame', 'Time', 'session_id'),
                         suffixes=('_Pos', '_Ori'))
+
+#FILTERING BAD VALUES
+dfRat.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
+
+# removal of smaller then err and out of range values
+for col in colChoice:
+    dfRat = dfRat[np.absolute(dfRat[col]) < 1]
+    dfRat = dfRat[np.absolute(dfRat[col]) > 1e-5]
+
+# removal of rat carrying position changes p
+dfRat = dfRat[np.absolute(dfRat['X_Pos']) < 1.5e-1]
+dfRat = dfRat[np.absolute(dfRat['Y_Pos']) < 3e-1]
+dfRat = dfRat[np.absolute(dfRat['Z_Pos']) < 1e-1]
