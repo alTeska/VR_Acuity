@@ -1,8 +1,8 @@
 # Script for creation of new dataset - analogical to VR_Acuity_Relational_Database_ER_Diagram.pdf
+import cfg
 import h5py
 import numpy as np
 import pandas as pd
-import cfg
 from glob import glob
 from tqdm import tqdm
 
@@ -10,7 +10,6 @@ from tqdm import tqdm
 fnames = glob('datasets/raw/*.h5')
 
 key = '/preprocessed/Rigid Body/Rat/'
-# col_choices = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
 
 # RAT BEHAVIOR:
 
@@ -26,6 +25,7 @@ for i, fname in tqdm(enumerate(fnames)):
 # FILTERING BAD VALUES
 df.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
 
+# col_choices = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
 # removal of smaller then err and out of range values - to be checked
 # for col in col_choices:
     # df = df[np.absolute(df[col]) < 1]

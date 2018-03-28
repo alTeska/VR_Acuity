@@ -2,13 +2,13 @@
 import pandas as pd
 import h5py
 import ast
+from glob import glob
 
 
 def index_df(df):
     p = len(df.index)
-    l = df.i[p-1]
     dfOut = df.set_index('i')
-    dfOut = dfOut.reindex(range(0, l+1))
+    dfOut = dfOut.reindex(range(0, df.i[p-1]+1))
     dfOut.fillna(method='pad', inplace=True)
     return dfOut
 
@@ -16,10 +16,8 @@ def index_df(df):
 def make_dict(event):
     eventD = {}
     for i in range(0, len(event)-1):
-        # change to string in proper format
-        str_dict = event[i].decode('UTF-8').replace('\'', '\"')
-        # find location of "attr"
-        n = str_dict.find('"attr"')
+        str_dict = event[i].decode('UTF-8').replace('\'', '\"')  # change to string
+        n = str_dict.find('"attr"')  # find location of "attr"
 
         if n != -1:
             str_dict = str_dict='{' + str_dict[n:]
@@ -32,47 +30,42 @@ def make_dict(event):
     return eventD
 
 
-fname = glob('../datasets/raw/*.h5')
-
-# EVENT:
+fnames = glob('datasets/raw/*.h5')
 key = '/events/'
 
+# EVENT:
 eventArg  = {}
 eventName = {}
 eventlog  = {}
 dfOri = {}
 
 # Loading
-for i, x in enumerate(fname):
-    eventlog[i]  = pd.read_hdf(path+x+'.h5', key+'eventlog')
+for i, x in enumerate(fnames):
+    eventlog[i]  = pd.read_hdf(x, key+'eventlog')
+    fileName = h5py.File(x, 'r')
 
-    fileName = h5py.File(path+x+'.h5', 'r')
     eventArg[i]  = fileName[key]['eventArguments']
     eventName[i] = fileName[key]['eventNames']
 
 # loading original files - for full time/frame series data
 key = '/preprocessed/Rigid Body/Rat/Orientation'
 
-for i, x in enumerate(fname):
+for i, x in enumerate(fnames):
     dfOri[i] = pd.read_hdf(x, key)
 
 
 # cleaning event arguments values
 eventA = {}
-for i, str_dict in enumerate(fname):
+for i, str_dict in enumerate(fnames):
     eventA[i] = make_dict(eventArg[i])
+
 
 # split attr data into 3 dictionaries
 DFVis = {}
 DFSpe = {}
 # DFDur = {}
 
-# split into 3 dictionaries
-DFVis = {}
-DFSpe = {}
-DFDur = {}
-
-for i in range(0, len(fname)):
+for i in range(0, len(fnames)):
     eventVis = {}
     eventSpe = {}
     eventDur = {}
@@ -97,13 +90,13 @@ for i in range(0, len(fname)):
 
 DFV = {}
 DFS = {}
-for i in range(0, len(fname)):
+for i in range(0, len(fnames)):
     DFV[i] = index_df(DFVis[i])
     DFS[i] = index_df(DFSpe[i])
 
 # merging into one table of dataframes
 df = {}
-for i in range(0, len(fname)):
+for i in range(0, len(fnames)):
     df[i] = pd.concat([eventlog[i], DFV[i].visible], axis=1)
     df[i] = pd.concat([df[i]      , DFS[i].speed]  , axis=1)
 
@@ -112,7 +105,7 @@ for i in range(0, len(fname)):
 
 # creation of all time data series with events - filling in the time series
 dfM = {}
-for i, x in enumerate(fname):
+for i, x in enumerate(fnames):
     df1 = df[i].dropna()
     df1.drop({'Time'}, axis=1, inplace=True)
 
@@ -124,11 +117,11 @@ for i, x in enumerate(fname):
 
 dfEvents = pd.DataFrame()
 
-for i, x in enumerate(fname):
-    # adding session id
-    dfM[i]['session_id'] = i
-
-    # merging into one dataset
-    dfEvents = pd.concat([dfEvents, dfM[i]], axis=0, ignore_index=True)
+for i, x in enumerate(fnames):
+    dfM[i]['session_id'] = i  # adding session id
+    dfEvents = pd.concat([dfEvents, dfM[i]], axis=0, ignore_index=True)  # merging into one dataset
 
 dfEvents.to_hdf(path+'relationaDatabase.h5', 'Events')
+
+with h5py.File(cfg.relational_fname, 'w') as f:
+    f.create_dataset('Events', data=dfEvents.to_records())
