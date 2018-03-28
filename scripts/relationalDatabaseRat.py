@@ -1,4 +1,3 @@
-# Script for creation of new dataset - analogical to VR_Acuity_Relational_Database_ER_Diagram.pdf
 import cfg
 import h5py
 import numpy as np
@@ -8,11 +7,10 @@ from tqdm import tqdm
 
 
 fnames = glob('datasets/raw/*.h5')
-
 key = '/preprocessed/Rigid Body/Rat/'
 
-# RAT BEHAVIOR:
 
+# RAT BEHAVIOR:
 # Loading and merging
 df = pd.DataFrame()
 for i, fname in tqdm(enumerate(fnames)):
