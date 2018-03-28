@@ -3,15 +3,7 @@ import numpy as np
 import pandas as pd
 import h5py
 
-fname = [
-    'VRAcuityExp_2017-07-13_14-39-17_VR-4A_NIC',
-    'VRAcuityExp_2017-07-13_15-05-16_VR-2B_NIC',
-    'VRAcuityExp_2017-07-13_15-19-09_VR-2A_EDU',
-    'VRAcuityExp_2017-07-13_15-38-34_VR-1A_NIC',
-    'VRAcuityExp_2017-07-13_15-53-40_VR-1B_NIC',
-    'VRAcuityExp_2017-07-13_16-11-46_VR-3A_NIC',
-    'VRAcuityExp_2017-07-13_16-27-08_VR-3A_NIC',
-    'VRAcuityExp_2017-07-13_17-09-07_VR-5A_NIC', ]
+fname = glob('../datasets/raw/*.h5')
 
 keys = [
     'RAT',
@@ -28,14 +20,13 @@ dfkeys = [
 ]
 
 # SESSION:
-path = 'datasets/'
 fileName = {}
 dfS = {}
 dfSessions = pd.DataFrame()
 
 for i, x in enumerate(fname):
     # load the dataset
-    fileName[i] = h5py.File(path+x+'.h5', 'r').attrs
+    fileName[i] = h5py.File(x, 'r').attrs
 
     # create needed dataframes and indices
     d = {'session_id': [i]}

@@ -32,19 +32,10 @@ def make_dict(event):
     return eventD
 
 
-fname = [
-    'VRAcuityExp_2017-07-13_14-39-17_VR-4A_NIC',
-    'VRAcuityExp_2017-07-13_15-05-16_VR-2B_NIC',
-    'VRAcuityExp_2017-07-13_15-19-09_VR-2A_EDU',
-    'VRAcuityExp_2017-07-13_15-38-34_VR-1A_NIC',
-    'VRAcuityExp_2017-07-13_15-53-40_VR-1B_NIC',
-    'VRAcuityExp_2017-07-13_16-11-46_VR-3A_NIC',
-    'VRAcuityExp_2017-07-13_16-27-08_VR-3A_NIC',
-    'VRAcuityExp_2017-07-13_17-09-07_VR-5A_NIC', ]
+fname = glob('../datasets/raw/*.h5')
 
 # EVENT:
 key = '/events/'
-path = 'datasets/'
 
 eventArg  = {}
 eventName = {}
@@ -63,7 +54,7 @@ for i, x in enumerate(fname):
 key = '/preprocessed/Rigid Body/Rat/Orientation'
 
 for i, x in enumerate(fname):
-    dfOri[i] = pd.read_hdf(path+fname[i]+'.h5', key)
+    dfOri[i] = pd.read_hdf(x, key)
 
 
 # cleaning event arguments values
