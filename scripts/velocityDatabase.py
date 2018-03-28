@@ -73,9 +73,9 @@ dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 600]   # too big velocities removal
 print('filtered and smooth')
 
 
-f = h5py.File('datasets/velocityDatabase.h5', 'w')
+f = h5py.File(path+'velocityDatabase.h5', 'w')
 
-f.create_dataset('Sessions', data=rDS.dfSessions.to_records())
-f.create_dataset('Events', data=rDE.dfEvents.to_records())
+# f.create_dataset('Sessions', data=rDS.dfSessions.to_records())
+# f.create_dataset('Events', data=rDE.dfEvents.to_records())
 f.create_dataset('Rat_Behavior', data=dfOri2.to_records())
 f.close()

@@ -24,7 +24,7 @@ dfratclean[colChoice] = g[colChoice].rolling(window=windowsize).mean().values
 
 dfratclean.dropna(inplace=True)
 
-f = h5py.File('datasets/filteredDatabase.h5', 'w')
+f = h5py.File(path+'filteredDatabase.h5', 'w')
 
 f.create_dataset('Sessions', data=rDS.dfSessions.to_records())
 f.create_dataset('Events', data=rDE.dfEvents.to_records())
