@@ -1,8 +1,10 @@
-# Script for creation of new dataset - analogical to VR_Acuity_Relational_Database_ER_Diagram.pdf
-import pandas as pd
+import cfg
 import h5py
 import ast
+import numpy as np
+import pandas as pd
 from glob import glob
+from tqdm import tqdm
 
 
 def index_df(df):
@@ -31,47 +33,24 @@ def make_dict(event):
 
 
 fnames = glob('datasets/raw/*.h5')
-key = '/events/'
-
-# EVENT:
-eventArg  = {}
-eventName = {}
-eventlog  = {}
-dfOri = {}
-
-# Loading
-for i, x in enumerate(fnames):
-    eventlog[i]  = pd.read_hdf(x, key+'eventlog')
-    fileName = h5py.File(x, 'r')
-
-    eventArg[i]  = fileName[key]['eventArguments']
-    eventName[i] = fileName[key]['eventNames']
-
-# loading original files - for full time/frame series data
 key = '/preprocessed/Rigid Body/Rat/Orientation'
 
-for i, x in enumerate(fnames):
-    dfOri[i] = pd.read_hdf(x, key)
+# EVENT:
+eventArgs, eventlogs = {}, {}
+df = pd.DataFrame()
 
+for i, fname in tqdm(enumerate(fnames)):
+    # Loading
+    f = h5py.File(fname, 'r')
+    eventlogs[i] = pd.read_hdf(fname, '/events/eventlog')
+    eventArgs[i] = f['/events/']['eventArguments']
+    eventArgs[i] = make_dict(eventArgs[i])  # cleaning event arguments values
 
-# cleaning event arguments values
-eventA = {}
-for i, str_dict in enumerate(fnames):
-    eventA[i] = make_dict(eventArg[i])
+    # split attr data into 3 dictionaries
+    eventVis, eventSpe = {}, {}
 
-
-# split attr data into 3 dictionaries
-DFVis = {}
-DFSpe = {}
-# DFDur = {}
-
-for i in range(0, len(fnames)):
-    eventVis = {}
-    eventSpe = {}
-    eventDur = {}
-
-    x = eventA[i]
-    j, m, n = 0, 0, 0
+    m, n = 0, 0
+    x = eventArgs[i]
     for ii in range(0, len(x)-1):
         k = list(x[ii].keys())[0]
         if   k == 'visible':
@@ -80,48 +59,28 @@ for i in range(0, len(fnames)):
         elif k == 'speed':
             eventSpe[n] = {'speed':x[ii]['speed'], 'i':ii}
             n += 1
-        elif k == 'duration':
-            eventDur[j] = {'duration':x[ii]['duration'], 'i':ii}
-            j += 1
 
-    DFVis[i] = pd.DataFrame.from_dict(eventVis, orient='index')
-    DFSpe[i] = pd.DataFrame.from_dict(eventSpe, orient='index')
-    #DFDur[i] = pd.DataFrame.from_dict(eventDur, orient='index')
+    ddV = index_df(pd.DataFrame.from_dict(eventVis, orient='index'))
+    ddS = index_df(pd.DataFrame.from_dict(eventSpe, orient='index'))
 
-DFV = {}
-DFS = {}
-for i in range(0, len(fnames)):
-    DFV[i] = index_df(DFVis[i])
-    DFS[i] = index_df(DFSpe[i])
+    # merging into one table of dataframes
+    dd = pd.concat([eventlogs[i], ddV.visible], axis=1)
+    dd = pd.concat([dd          , ddS.speed]  , axis=1)
 
-# merging into one table of dataframes
-df = {}
-for i in range(0, len(fnames)):
-    df[i] = pd.concat([eventlog[i], DFV[i].visible], axis=1)
-    df[i] = pd.concat([df[i]      , DFS[i].speed]  , axis=1)
+    dd.fillna(method='pad', inplace=True)
+    dd.fillna(0           , inplace=True)
 
-    df[i].fillna(method='pad', inplace=True)
-    df[i].fillna(0, inplace=True)
+    dd.drop({'Time'}, axis=1, inplace=True)
+    dd.dropna(inplace=True)
 
-# creation of all time data series with events - filling in the time series
-dfM = {}
-for i, x in enumerate(fnames):
-    df1 = df[i].dropna()
-    df1.drop({'Time'}, axis=1, inplace=True)
+    # recreation for full time frame
+    dd = pd.merge(pd.read_hdf(fname, key), dd, on='Frame', how='left')
+    dd.drop({'X', 'Y', 'Z'}, axis=1, inplace=True)
+    dd.fillna(method='ffill', inplace=True)
 
-    dfM[i] = pd.merge(dfOri[i], df1, on='Frame', how='left')
-    dfM[i].drop({'X', 'Y', 'Z'}, axis=1, inplace=True)
-
-    dfM[i].fillna(method='ffill', inplace=True)
+    dd['session_id'] = i  # adding session id
+    df = df.append(dd)
 
 
-dfEvents = pd.DataFrame()
-
-for i, x in enumerate(fnames):
-    dfM[i]['session_id'] = i  # adding session id
-    dfEvents = pd.concat([dfEvents, dfM[i]], axis=0, ignore_index=True)  # merging into one dataset
-
-dfEvents.to_hdf(path+'relationaDatabase.h5', 'Events')
-
-with h5py.File(cfg.relational_fname, 'w') as f:
-    f.create_dataset('Events', data=dfEvents.to_records())
+with h5py.File(cfg.relational_fname, 'a') as f:
+    f.create_dataset('Events', data=df.to_records())

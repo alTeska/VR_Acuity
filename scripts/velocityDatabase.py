@@ -1,33 +1,28 @@
-import relationalDatabaseEvent   as rDE
-import relationalDatabaseSession as rDS
+import cfg
+import h5py
 import numpy as np
 import pandas as pd
-import h5py
+from tqdm import tqdm
 
 
 pd.options.mode.chained_assignment = None  # to be fixed
-
-path = 'datasets/'
 
 dfOri = pd.DataFrame()
 dfOri2 = pd.DataFrame()
 dfOriU = pd.DataFrame()
 
-dfrat = pd.read_hdf(path+'filteredDatabase.h5', 'Rat_Behavior').set_index('index')
-dfevent = pd.read_hdf(path+'relationalDatabase.h5', 'Events').set_index('index')
-
+dfrat   = pd.read_hdf(cfg.filtered_fname, 'Rat_Behavior').set_index('index')
+dfevent = pd.read_hdf(cfg.filtered_fname, 'Rat_Behavior').set_index('index')
 print('loaded')
 
 
 ## VECTORS WITHOUT Y
-for name, dd in dfrat.groupby('session_id'):
+for name, dd in tqdm(dfrat.groupby('session_id')):
     dd['dT'] = dd['Time'].diff(1)
-
     # calculating lenghts of VecX and VecZ and creation of shifted vectors   #dd = dd.apply(decompose_vec_df, axis=1)
     dd['lVo'] = np.linalg.norm(np.array([dd.X_Ori, dd.Y_Ori, dd.Z_Ori])  )
     dd['lx1'] = dd['X_Ori'] / dd['lVo']
     dd['lz1'] = dd['Z_Ori'] / dd['lVo']
-
     # normalize the data to unit vector form
     dd['V1'] = np.linalg.norm(np.array([dd.lx1, 0, dd.lz1]))
     dd['lx1'] = dd.lx1 / dd.V1
@@ -36,10 +31,9 @@ for name, dd in dfrat.groupby('session_id'):
     dd['V1_ori'] = np.linalg.norm(np.array([dd.X_Ori, 0, dd.Z_Ori]))
     dd['lx1_ori'] = dd.X_Ori / dd.V1
     dd['lz1_ori'] = dd.Z_Ori / dd.V1
-
     dfOri = pd.concat([dfOri, dd], axis=0, ignore_index=True)
 
-dfOri = dfOri.replace([np.inf, -np.inf], np.nan).dropna()
+dfOri.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
 
 print('vectors')
 
@@ -47,7 +41,7 @@ print('vectors')
 ## ANGLES and VELOCITY
 
 # calculatinig the angles between X axis and the vectors
-for name, dd in dfOri.groupby('session_id'):
+for name, dd in tqdm(dfOri.groupby('session_id')):
     V1 = np.array([dd.lx1, 0, dd.lz1])
     V2 = np.array([1     , 0, 0     ])
 
@@ -61,7 +55,7 @@ for name, dd in dfOri.groupby('session_id'):
     dd['U'] = np.degrees(dd.theta)/ dd.dT
     dfOri2 = pd.concat([dfOri2, dd], axis=0, ignore_index=True)
 
-dfOri2 = dfOri2.replace([np.inf, -np.inf], np.nan).dropna()
+dfOri2.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
 
 print('velocity')
 
@@ -70,12 +64,9 @@ print('velocity')
 dfOri2 = dfOri2[np.absolute(dfOri2['dT']) < 0.005] # filtering out big time gaps frame points
 dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 600]   # too big velocities removal
 
-print('filtered and smooth')
 
-
-f = h5py.File(path+'velocityDatabase.h5', 'w')
-
-# f.create_dataset('Sessions', data=rDS.dfSessions.to_records())
-# f.create_dataset('Events', data=rDE.dfEvents.to_records())
-f.create_dataset('Rat_Behavior', data=dfOri2.to_records())
-f.close()
+dfsession = pd.read_hdf(cfg.relational_fname, 'Sessions').set_index('index')
+with h5py.File(cfg.velocity_fname, 'w') as f:
+    f.create_dataset('Rat_Behavior', data=dfOri2.to_records())
+    f.create_dataset('Events'      , data=dfevent.to_records())
+    f.create_dataset('Sessions'    , data=dfsession.astype('|S').to_records())

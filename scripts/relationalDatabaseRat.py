@@ -35,5 +35,5 @@ df = df[np.absolute(df['Y_Pos']) < 3e-1]
 df = df[np.absolute(df['Z_Pos']) < 1e-1]
 
 
-with h5py.File(cfg.relational_fname, 'w') as f:
+with h5py.File(cfg.relational_fname, 'a') as f:
     f.create_dataset('Rat_Behavior', data=df.to_records())

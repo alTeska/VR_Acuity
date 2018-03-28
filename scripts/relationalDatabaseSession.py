@@ -30,5 +30,5 @@ for i, fname in tqdm(enumerate(fnames)):
     df = df.append(dd)
 
 
-with h5py.File(cfg.relational_fname, 'w') as f:
+with h5py.File(cfg.relational_fname, 'a') as f:
     f.create_dataset('Sessions', data=df.astype('|S').to_records())
