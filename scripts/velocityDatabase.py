@@ -23,6 +23,7 @@ for name, dd in tqdm(dfrat.groupby('session_id')):
     dd['lVo'] = np.linalg.norm(np.array([dd.X_Ori, dd.Y_Ori, dd.Z_Ori])  )
     dd['lx1'] = dd['X_Ori'] / dd['lVo']
     dd['lz1'] = dd['Z_Ori'] / dd['lVo']
+    
     # normalize the data to unit vector form
     dd['V1'] = np.linalg.norm(np.array([dd.lx1, 0, dd.lz1]))
     dd['lx1'] = dd.lx1 / dd.V1
