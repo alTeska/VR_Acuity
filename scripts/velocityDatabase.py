@@ -23,15 +23,12 @@ for name, dd in tqdm(dfrat.groupby('session_id')):
     dd['lVo'] = np.linalg.norm(np.array([dd.X_Ori, dd.Y_Ori, dd.Z_Ori])  )
     dd['lx1'] = dd['X_Ori'] / dd['lVo']
     dd['lz1'] = dd['Z_Ori'] / dd['lVo']
-    
+
     # normalize the data to unit vector form
     dd['V1'] = np.linalg.norm(np.array([dd.lx1, 0, dd.lz1]))
     dd['lx1'] = dd.lx1 / dd.V1
     dd['lz1'] = dd.lz1 / dd.V1
 
-    dd['V1_ori'] = np.linalg.norm(np.array([dd.X_Ori, 0, dd.Z_Ori]))
-    dd['lx1_ori'] = dd.X_Ori / dd.V1
-    dd['lz1_ori'] = dd.Z_Ori / dd.V1
     dfOri = pd.concat([dfOri, dd], axis=0, ignore_index=True)
 
 dfOri.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
@@ -43,17 +40,22 @@ print('vectors')
 
 # calculatinig the angles between X axis and the vectors
 for name, dd in tqdm(dfOri.groupby('session_id')):
-    V1 = np.array([dd.lx1, 0, dd.lz1])
-    V2 = np.array([1     , 0, 0     ])
+    dd['lx2'] = dd.lx1.shift(1)
+    dd['lz2'] = dd.lz1.shift(1)
 
-#   theta0 = np.arccos(lx1*1 + lz1*0 / (np.linalg.norm(V1) * np.linalg.norm(V2)))
-    dd['theta0'] = np.arccos(dd.lx1 / (np.linalg.norm(V1) * np.linalg.norm(V2)))
-    dd['theta1'] = dd.theta0.shift(1)
-    dd['theta']  = dd.theta0 - dd.theta1
-    dd.drop({'theta0','theta1'}, axis=1, inplace=True)
+    V1 = np.array([dd.lx1, 0, dd.lz1])
+    V2 = np.array([dd.lx2, 0, dd.lz2])
+
+    dd['clockwise'] = dd.lz1 * dd.lx2 < dd.lx1 * dd.lz2
+    dd.clockwise = dd.clockwise.astype(int).replace(to_replace=0, value=-1)
+
+    dd['theta']  = np.arccos(np.dot(V1, V2) / (np.linalg.norm(V1) * np.linalg.norm(V2)))
+
 
     # angular velocity between two vectors
-    dd['U'] = np.degrees(dd.theta)/ dd.dT
+    dd['U'] = np.degrees(dd.theta * dd.clockwise)/ dd.dT
+    dd['UM'] = dd['U'].rolling(window=20).mean(center=True)
+
     dfOri2 = pd.concat([dfOri2, dd], axis=0, ignore_index=True)
 
 dfOri2.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
@@ -63,7 +65,7 @@ print('velocity')
 
 ## FILTERING HIGH DATA
 dfOri2 = dfOri2[np.absolute(dfOri2['dT']) < 0.005] # filtering out big time gaps frame points
-dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 600]   # too big velocities removal
+# dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 2000]   # too big velocities removal
 
 
 dfsession = pd.read_hdf(cfg.relational_fname, 'Sessions').set_index('index')

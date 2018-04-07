@@ -23,11 +23,11 @@ for i, fname in tqdm(enumerate(fnames)):
 # FILTERING BAD VALUES
 df.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
 
-# col_choices = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
 # removal of smaller then err and out of range values - to be checked
-# for col in col_choices:
-    # df = df[np.absolute(df[col]) < 1]
-    # df = df[np.absolute(df[col]) > 1e-5]
+col_choices = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
+for col in col_choices:
+    df = df[np.absolute(df[col]) < 1]
+    df = df[np.absolute(df[col]) > 1e-5]
 
 # removal of rat carrying position changes p
 df = df[np.absolute(df['X_Pos']) < 1.5e-1]

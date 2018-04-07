@@ -19,8 +19,8 @@ dfratclean = dfratrear[  (dfratrear['Y_Ori'] > -0.75)
 
 # smoothing dataset
 g = dfratclean.groupby('session_id')
-# dfratclean[colChoice] = g[colChoice].rolling(window=windowsize).mean().values
-dfratclean[colChoice] = g[colChoice].rolling(window=windowsize, centered=True).mean().values
+dfratclean[colChoice] = g[colChoice].rolling(window=windowsize).mean().values
+# dfratclean[colChoice] = g[colChoice].rolling(window=windowsize, centered=True).mean().values
 
 dfratclean.dropna(inplace=True)
 
