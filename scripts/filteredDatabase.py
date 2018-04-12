@@ -1,26 +1,22 @@
 import cfg
 import h5py
 import pandas as pd
-# import numpy as np
-# from tqdm import tqdm
-
 
 pd.options.mode.chained_assignment = None  # to be fixed
-windowsize = 100
 
 
 dfrat = pd.read_hdf(cfg.relational_fname, 'Rat_Behavior').set_index('index')
 colChoice = ['X_Pos', 'Y_Pos', 'Z_Pos', 'X_Ori', 'Y_Ori', 'Z_Ori']
 
 #filtering the dataset
-dfratrear = dfrat[dfrat['Y_Pos'] < 0.13]
-dfratclean = dfratrear[  (dfratrear['Y_Ori'] > -0.75)
-                       & (dfratrear['Y_Pos'] > 0.07)]
+dfratrear = dfrat[dfrat['Y_Pos'] < cfg.FILT_REARING_YPOS]
+dfratclean = dfratrear[  (dfratrear['Y_Ori'] > cfg.FILT_CLEANING_YORI)
+                       & (dfratrear['Y_Pos'] > cfg.FILT_CLEANING_YPOS)]
 
 # smoothing dataset
 g = dfratclean.groupby('session_id')
-dfratclean[colChoice] = g[colChoice].rolling(window=windowsize).mean().values
-# dfratclean[colChoice] = g[colChoice].rolling(window=windowsize, centered=True).mean().values
+dfratclean[colChoice] = g[colChoice].rolling(window=cfg.WIDNOW_DATA,
+                                             center=cfg.WINDOW_DATA_CENTER).mean().values
 
 dfratclean.dropna(inplace=True)
 

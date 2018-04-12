@@ -7,10 +7,7 @@ from tqdm import tqdm
 
 pd.options.mode.chained_assignment = None  # to be fixed
 
-dfOri = pd.DataFrame()
-dfOri2 = pd.DataFrame()
-dfOriU = pd.DataFrame()
-
+dfOri, dfOri2, dfOriU = pd.DataFrame(), pd.DataFrame() , pd.DataFrame()
 dfrat   = pd.read_hdf(cfg.filtered_fname, 'Rat_Behavior').set_index('index')
 dfevent = pd.read_hdf(cfg.filtered_fname, 'Rat_Behavior').set_index('index')
 print('loaded')
@@ -51,10 +48,10 @@ for name, dd in tqdm(dfOri.groupby('session_id')):
 
     dd['theta']  = np.arccos(np.dot(V1, V2) / (np.linalg.norm(V1) * np.linalg.norm(V2)))
 
-
     # angular velocity between two vectors
     dd['U'] = np.degrees(dd.theta * dd.clockwise)/ dd.dT
-    dd['UM'] = dd['U'].rolling(window=20).mean(center=True)
+    dd['UM'] = dd['U'].rolling(window=cfg.WINDOW_VELOCITY,
+                               center=cfg.WINDOW_VELOCITY_CENTER).mean()
 
     dfOri2 = pd.concat([dfOri2, dd], axis=0, ignore_index=True)
 
@@ -63,9 +60,8 @@ dfOri2.replace([np.inf, -np.inf], np.nan).dropna(inplace=True)
 print('velocity')
 
 
-## FILTERING HIGH DATA
-dfOri2 = dfOri2[np.absolute(dfOri2['dT']) < 0.005] # filtering out big time gaps frame points
-# dfOri2 = dfOri2[np.absolute(dfOri2['U'])  < 2000]   # too big velocities removal
+# filtering out big time gaps frame points
+dfOri2 = dfOri2[np.absolute(dfOri2['dT']) < cfg.FILT_DTIME]
 
 
 dfsession = pd.read_hdf(cfg.relational_fname, 'Sessions').set_index('index')
