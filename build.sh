@@ -6,4 +6,4 @@ python scripts/relationalDatabaseEvent.py
 python scripts/filteredDatabase.py
 python scripts/velocityDatabase.py
 
-jupyter nbconvert --to html reports/*.ipynb --output-dir reports/html
+# jupyter nbconvert --to html reports/*.ipynb --output-dir reports/html

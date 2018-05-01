@@ -1,12 +1,11 @@
-# File names
+3# File names
 relational_fname = 'datasets/preprocessed/relationalDatabase.h5'
 velocity_fname = 'datasets/preprocessed/velocityDatabase.h5'
 filtered_fname = 'datasets/preprocessed/filteredDatabase.h5'
 
 # Rolling windows
-WIDNOW_DATA = 80
+WIDNOW_DATA = 20
 WINDOW_DATA_CENTER = True
-WINDOW_VELOCITY = 20
 WINDOW_VELOCITY_CENTER = True
 
 # Filtering values
