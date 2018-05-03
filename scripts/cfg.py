@@ -4,7 +4,7 @@ velocity_fname = 'datasets/preprocessed/velocityDatabase.h5'
 filtered_fname = 'datasets/preprocessed/filteredDatabase.h5'
 
 # Rolling windows
-WIDNOW_DATA = 20
+WIDNOW_DATA = 40
 WINDOW_DATA_CENTER = True
 WINDOW_VELOCITY_CENTER = True
 
