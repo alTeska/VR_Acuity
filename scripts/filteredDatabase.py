@@ -13,7 +13,7 @@ dfrat2 = pd.read_hdf(cfg.relational_fname, 'Rat_Behavior').set_index('index')
 dfrat2['Filtered_a'] =  dfrat['Y_Pos'] < cfg.FILT_REARING_YPOS
 dfrat2['Filtered_b'] = (dfrat['Y_Ori'] > cfg.FILT_CLEANING_YORI) & (dfrat['Y_Pos'] > cfg.FILT_CLEANING_YPOS)
 
-dfrat['Filtered'] = dfrat2['Filtered_a'] | dfrat2['Filtered_b']
+dfrat['Filtered'] = dfrat2['Filtered_a'] & dfrat2['Filtered_b']
 
 
 # smoothing dataset
