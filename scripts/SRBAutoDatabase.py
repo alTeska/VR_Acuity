@@ -23,7 +23,7 @@ limits = pd.DataFrame(cfg.LIMITS)
 rat_sf['Dmin'], rat_sf['Dmax'] = 0, 0
 rat_sf['change'] = False
 for index, row in tqdm(limits.iterrows()):
-    rat_sf['change'] = (rat_sf['Dmin']==0) & (rat_sf['speed']==row['speed'])
+rat_sf['change'] = (rat_sf['Dmin']==0) & (rat_sf['speed']==row['speed'])
     rat_sf['Dmin'] = np.where(rat_sf['change']==True, row['min'], rat_sf['Dmin'])
     rat_sf['Dmax'] = np.where(rat_sf['change']==True, row['max'], rat_sf['Dmax'])
 
