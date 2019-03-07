@@ -36,15 +36,19 @@ Featured notebooks can be found in report folder.
 
 ## Results
 
-<figure><center>
+<figure>
+<p align="center">
     <img src="/img/ori_pos.png" width="50%">
+    </p>
 <figcaption>
   Visualization of one of the experiments, illustrating the position of the rat (point on the plot) and angle of the animals head with color coding.
 </figcaption>
 </figure>
 
-<figure><center>
+<figure>
+<p align="center">
     <img src="/img/SRB.png" width="80%">
+</p>
 <figcaption>
 Histograms of stimuli related behavior for different velocities and directions.
 </figcaption>
